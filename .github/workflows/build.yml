@@ -39,7 +39,7 @@ jobs:
             echo "ERROR: Tidak ada file .cpp di folder utama repository."
             exit 1
           fi
-          g++ -std=c++17 -O2 -static-libgcc -static-libstdc++ "${sources[@]}" -o aplikasi-windows.exe
+          g++ -std=c++17 -O2 -static -static-libgcc -static-libstdc++ "${sources[@]}" -o aplikasi-windows.exe
 
       - name: Upload EXE
         uses: actions/upload-artifact@v4

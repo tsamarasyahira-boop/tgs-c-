@@ -1,19 +1,28 @@
 
-name: Build C++ EXE
+name: Build C++ Windows EXE
 
 on:
-  push:
   workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths:
+      - '**.cpp'
+      - '**.h'
+      - '**.hpp'
+      - '.github/workflows/build.yml'
+
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-      - name: Download source code
+      - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Install C++ Compiler
+      - name: Install MinGW-w64
         uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
@@ -22,10 +31,20 @@ jobs:
 
       - name: Compile C++ to EXE
         shell: msys2 {0}
-        run: g++ -std=c++17 -O2 -static main.cpp -o main.exe
+        run: |
+          set -e
+          shopt -s nullglob
+          sources=( *.cpp )
+          if [ ${#sources[@]} -eq 0 ]; then
+            echo "ERROR: Tidak ada file .cpp di folder utama repository."
+            exit 1
+          fi
+          g++ -std=c++17 -O2 -static-libgcc -static-libstdc++ "${sources[@]}" -o aplikasi-windows.exe
 
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
           name: aplikasi-windows
-          path: main.exe
+          path: aplikasi-windows.exe
+          if-no-files-found: error
+          retention-days: 7
